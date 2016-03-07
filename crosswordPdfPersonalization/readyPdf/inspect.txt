@@ -1,0 +1,8 @@
+./resource/Krystslovica_split_test_214_I_0000001_0055600_I_1456493399113.pdf
+Number of pages: 55600
+Size of page 1: [0.0,0.0,936.0,1417.32]
+Rotation of page 1: 0
+Page size with rotation of page 1: Rectangle: 936.0x1417.32 (rot: 0 degrees)
+Is rebuilt? false
+Is encrypted? false
+
