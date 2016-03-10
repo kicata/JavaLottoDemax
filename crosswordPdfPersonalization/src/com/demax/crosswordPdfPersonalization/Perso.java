@@ -41,9 +41,7 @@ public class Perso {
 		final String DIRECTORY = "./readyPdf/";
 		final String FILETITLE = "Krystoslovica_z11.2";
 		final String ZAIAVKA = "Zaiavka 11.2";
-		final BaseColor BLACK;
-		
-		
+
 		Rectangle pageSize = getSize(TEMPLATE);
 		PdfReader templReader = new PdfReader(TEMPLATE);
 		
@@ -220,16 +218,15 @@ public class Perso {
 	
 	private static String constructTextMessage(int pageNum, int totalPages, int pagesPerFile, int count, String zaiavka){
 		StringBuilder sb = new StringBuilder();
-		//int pagePerHudred = ((((count - pageNum)- pagesPerFile) - 1)/100);
 		int pagePerHudred;
 		String value =Integer.toString(pageNum);
+		
 		if (value.length()>2) {
 			pagePerHudred = Integer.parseInt(value.substring(value.length()-2));
 		} else {
 			pagePerHudred = pageNum;
 		}
-		 
-		
+		 		
 		sb.append(pageNum);
 		sb.append("/");
 		sb.append(totalPages);
