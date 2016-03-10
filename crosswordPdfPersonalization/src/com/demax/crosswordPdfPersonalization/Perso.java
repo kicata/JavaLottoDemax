@@ -20,6 +20,7 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.Utilities;
 import com.itextpdf.text.io.RandomAccessSource;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
+import com.itextpdf.text.log.SysoCounter;
 import com.itextpdf.text.pdf.Barcode128;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
@@ -56,9 +57,9 @@ public class Perso {
 		int fileCount = dataForIteration[0];
 		int rest = dataForIteration[1];
 		int first;
-
+		long bigStart = System.nanoTime();
 		//for the full fileCount
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < fileCount; i++) {
 			first = (i * pagesPerFile) + 1;
 			try {
 
@@ -82,11 +83,13 @@ public class Perso {
 					templReader, pageSize, hebarCondNormal);
 			System.out.println("READY check directory");
 		} catch (DocumentException | IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println("exception in ");
 			e.printStackTrace();
 			
 		}
+		
+		long bigEnd=System.nanoTime();
+		System.out.println("Assembled for "+(((bigEnd-bigStart)/1000000000)/60)+" mins");
 
 	}
 	
@@ -96,8 +99,8 @@ public class Perso {
 		
 	PdfImportedPage templPage, lPage, rPage;
 	
-	long time = System.currentTimeMillis();
-	System.out.println("Start assembling file " + time);
+	long start = System.nanoTime();
+	System.out.println("Start assembling file ");
 	int lPageIndex = first; 
 	int rPageIndex = lPageIndex + step;
 	int pCount = first + pagesPerFile;
@@ -123,7 +126,7 @@ public class Perso {
 		for(int j = first; j< pCount;j++){
 			
 			if (j % 100 == 0) {
-				reverse(flag);
+				flag = reverse(flag);
 				System.out.println("Processed page " + j);
 			}
 		
@@ -135,25 +138,23 @@ public class Perso {
 			rPage = writer.getImportedPage(reader, rPageIndex);
 			cbo.addTemplate(rPage, pageSize.getWidth() / 2, 0);
 
-			Image bc = createBarcode(cbo, Integer.toString(j), 50, 8);
-			Image bc1 = createBarcode(cbo, Integer.toString(j), 50, 8);
 			String text = constructTextMessage(j, step, pagesPerFile, pCount, zaiavka);
 			
 			//left part
-			placeBarcode(doc, bc, 90, 5, 140);
-			printMessageOnPosition(cbo, font, text+" LQVO", 5, 140, 90);
+			placeBarcodeOnPosition(doc, cbo, Integer.toString(j), 40, 6, 1, 138, 90);
+			printMessageOnPosition(cbo, font, text+" LQVO", 5, 65, 90);
 
 			//right part
-			placeBarcode(doc, bc1, -90, 650, 70);
-			printMessageOnPosition(cbo, font, text+" DQSNO", 650, 240, -90);
+			placeBarcodeOnPosition(doc, cbo, Integer.toString(j), 40, 6, 652, 135, -90);
+			printMessageOnPosition(cbo, font, text+" DQSNO", 652, 252, -90);
 
 			//deepCounter Mark
 			if (flag == true) {
 				printLineOnPosition(5, 462, 5, 472, cbo, 10);
 				printLineOnPosition(335, 462, 335, 472, cbo, 10);
 			}else{
-				printLineOnPosition(5, 452, 5, 462, cbo, 10);
-				printLineOnPosition(335, 452, 335, 462, cbo, 10);
+				printLineOnPosition(5, 472, 5, 482, cbo, 10);
+				printLineOnPosition(335, 472, 335, 482, cbo, 10);
 				
 			}
 			
@@ -169,7 +170,8 @@ public class Perso {
 	doc.close();
 
 	System.out.println("Assembled file " + filename);
-	System.out.println((System.currentTimeMillis()-time)+"ns per million");
+	long end=System.nanoTime();
+	System.out.println("Assembled for "+(((end-start)/1000000000)/60)+" mins");
 
 	}
 	
@@ -180,23 +182,25 @@ public class Perso {
 		return true;
 	}
 	
-    private static void placeBarcode(Document doc, Image codeImage, float rotation, float lX, float lY ) throws DocumentException{
-    	codeImage.setRotationDegrees(rotation);
-    	codeImage.setAbsolutePosition(Utilities.millimetersToPoints(lX), Utilities.millimetersToPoints(lY));
-    	doc.add(codeImage);
-    }
-    
-    
-	private static Image createBarcode(PdfContentByte cb, String text, float width, float height) throws BadElementException{
-		Barcode128 code128  = new Barcode128();
+	private static void placeBarcodeOnPosition(Document doc, PdfContentByte cb, String text,float width,float height,float lX,float lY,float rotation){
+		Barcode128 code128 = new Barcode128();
 		code128.setCode(text.trim());
 		code128.setCodeType(Barcode128.CODE128);
-		code128.setBarHeight(height);
 		code128.setFont(null);
-        PdfTemplate template = cb.createTemplate(Utilities.millimetersToPoints(width), Utilities.millimetersToPoints(height));
-        code128.placeBarcode(template, BaseColor.BLACK, null);
-        return Image.getInstance(template);
-    }
+		Image code128Img= code128.createImageWithBarcode(cb, null, null);
+		code128Img.scaleAbsolute(Utilities.millimetersToPoints(width), Utilities.millimetersToPoints(height));
+		code128Img.setRotationDegrees(rotation);
+		code128Img.setAbsolutePosition(Utilities.millimetersToPoints(lX), Utilities.millimetersToPoints(lY));
+		
+		try {
+			doc.add(code128Img);
+		} catch (DocumentException e) {
+			System.out.println("Error adding barcode image");
+			e.printStackTrace();
+		}
+		
+		
+	}
 
 	private static void printLineOnPosition(float xStart, float yStart, float xEnd, float yEnd, PdfContentByte cb, float Width)
     {
@@ -267,7 +271,7 @@ public class Perso {
 			PdfReader reader = new PdfReader(filename);
 			pageSize = reader.getPageSize(1);
 		} catch (Exception e) {
-			// TODO: handle exception
+			
 			System.out.println("exception in getSize()");
 			e.printStackTrace();
 		}
@@ -287,7 +291,7 @@ public class Perso {
 		} catch (Exception e) {
 			System.out.println("exception in getNumberOfPages()");
 			e.printStackTrace();
-			// TODO: handle exception
+			
 		}
 
 		return numPages;
