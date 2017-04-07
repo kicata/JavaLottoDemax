@@ -26,14 +26,14 @@ import com.itextpdf.text.pdf.PdfWriter;
 public class TicketGenII {
 
 	public static void main(String[] args) {
-		final String destPath="./pdf/etiketi_Bingo_Milioni_z8.3.pdf";
+		final String destPath="./pdf/etiketi_BingoMilioni_8.5.pdf";
 		final String destPathPerso="./pdf/labelsPersonalized.pdf";
-		double xDist=Utilities.millimetersToPoints(70f);
+		double xDist = Utilities.millimetersToPoints(70f);
 		double yDist = Utilities.millimetersToPoints(50f);
 		double startX = 0;
 		double startY = Utilities.millimetersToPoints(23f) + (4*yDist);
 		int step = 400;
-		long startNum = 3001000001l; 
+		long startNum = 3002000001l; 
 		int tiraz = 500000;
 		int labelCount = tiraz / step;
 		float sWidth = Utilities.millimetersToPoints(70f);
@@ -47,7 +47,7 @@ public class TicketGenII {
 					"BINGO МИЛИОНИ - 2лв.\r\n",
 					"от No ",
 					"до No ",
-					"Заявка Nо 8.3"};
+					"Заявка Nо 8.5"};
 		
 		
 		try {
@@ -91,9 +91,9 @@ public class TicketGenII {
 			text.add(new Phrase(lParam[1], hebarCondBold));
 			text.add(new Phrase(lParam[2], hebarCondBold));
 			text.add(new Phrase(lParam[3], hebarCondBold));
-			Phrase from= new Phrase();
-			Chunk f=new Chunk(lParam[4],hebarCondNormal);
-			Chunk faddOn=new Chunk(Long.toString(startNum) +"\r\n", hebarCondBold);
+			Phrase from = new Phrase();
+			Chunk f = new Chunk(lParam[4],hebarCondNormal);
+			Chunk faddOn = new Chunk(Long.toString(startNum) +"\r\n", hebarCondBold);
 			from.add(f);
 			from.add(faddOn);
 			text.add(from);

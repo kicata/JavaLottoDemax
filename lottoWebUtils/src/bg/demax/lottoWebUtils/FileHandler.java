@@ -65,20 +65,14 @@ public class FileHandler {
 
 	}
 
-	public static void extractPdfTable(String inputPath,
-			String userInputFilePath, String outputfilePath,
-			String outputPdfPath, String encoding, int fontSize)
+	public static void extractPdfTable(String inputPath,String outputfilePath,String outputPdfPath, 
+			String encoding, int fontSize, List<Integer> indexes)
 			throws UnsupportedEncodingException, FileNotFoundException,
 			IOException {
 
-		ArrayList<String> userRows = getFileContents(userInputFilePath,
-				encoding);
-		ArrayList<Integer> indexes = parseUserInputToInt(userRows.get(1));
-
-		String header = userRows.get(0);
 		Collections.sort(indexes);
 		ArrayList<String> dataRows = getFileContents(inputPath, encoding);
-
+		String header = dataRows.get(0);
 		extractDataInSepFile(dataRows, indexes, outputfilePath, header,
 				encoding);
 
@@ -92,8 +86,7 @@ public class FileHandler {
 
 		Map<Integer, List<String>> colData = getFirstRowColumnData(inputPath,
 				separator, startColInd, substFromEndColCount);
-		Map.Entry<Integer, List<String>> entry = colData.entrySet().iterator()
-				.next();
+		Map.Entry<Integer, List<String>> entry = colData.entrySet().iterator().next();
 		int colCount = entry.getKey();
 		List<String> colNames = entry.getValue();
 
@@ -127,7 +120,7 @@ public class FileHandler {
 					int length = splLine.length
 							- (startColInd + substFromEndColCount);
 
-					for (int i = startColInd, j = 0; i <= length; i++, j++) {
+					for (int i = startColInd, j = 0; j < length; i++, j++) {
 						String key = splLine[i];
 
 						if (statistic.get(j).containsKey(key)) {
@@ -243,19 +236,22 @@ public class FileHandler {
 	}
 
 	public static void winStatisticReport(String inputPath,
-			String outputReportPath, int ticketWinPosition,
+			String outputReportPath, String outputWinListPath, int ticketWinPosition,
 			String separator) {
 
 		try (BufferedReader bfr = new BufferedReader(new InputStreamReader(
 				new FileInputStream(inputPath), "utf-8"));
 				BufferedWriter bfw = new BufferedWriter(new OutputStreamWriter(
-						new FileOutputStream(outputReportPath), "utf-8"))) {
+						new FileOutputStream(outputReportPath), "utf-8"));
+				BufferedWriter bfw1 = new BufferedWriter(new OutputStreamWriter(
+						new FileOutputStream(outputWinListPath), "utf-8"))) {
 
 			String line;
 			int keyWin = 0;
 			int totalWinValue = 0;
 			int lineCounter = 1;
 			Map<Integer, Integer> wins = new TreeMap<>();
+			Map<Integer,String> singleWinContainer= new TreeMap<>();
 
 			while ((line = bfr.readLine()) != null) {
 				if (lineCounter == 1) {
@@ -272,6 +268,7 @@ public class FileHandler {
 
 				} else {
 					wins.put(keyWin, 1);
+					singleWinContainer.put(keyWin, line);
 
 				}
 
@@ -281,18 +278,31 @@ public class FileHandler {
 			bfw.newLine();
 			for (Integer key : wins.keySet()) {
 				Integer value = wins.get(key);
-				totalWinValue += value;
+				totalWinValue += (value * key);
 				String row = key.toString() + " - " + wins.get(key);
 				bfw.write(row);
 				bfw.newLine();
 			}
 			bfw.write("Обща стойност на печалбите: " + totalWinValue);
 			bfw.newLine();
+			
+			
+			for (Integer key : singleWinContainer.keySet()) {
+				String winRow= singleWinContainer.get(key);
+				bfw1.write(Integer.toString(key));
+				bfw1.newLine();
+				bfw1.write(winRow);
+				bfw1.newLine();
+				
+			}
 			bfw.flush();
-			System.out.println("Check txt");
+			bfw1.flush();
+			System.out.println("Check winStatistic report txt");
+			System.out.println("Check winRow report txt");
 			System.out.println("Readed lines " + lineCounter);
+			System.out.println("Total win token count "+singleWinContainer.keySet().size());
 		} catch (IOException ioe) {
-			System.out.println(ioe.toString());
+			ioe.printStackTrace();
 		}
 
 	}
@@ -364,9 +374,9 @@ public class FileHandler {
 			int substrFromEnd, String separator) {
 		StringBuilder sb = new StringBuilder();
 		int len = splRow.length - substrFromEnd;
-		for (int i = startIndex; i < len - 1; i++) {
+		for (int i = startIndex; i < len; i++) {
 
-			if (i != len - 2) {
+			if (i != len - 1) {
 				sb.append(splRow[i]);
 				sb.append(separator);
 			} else {
@@ -463,7 +473,7 @@ public class FileHandler {
 	}
 
 	private static void extractDataInSepFile(ArrayList<String> rows,
-			ArrayList<Integer> indexes, String outputfilePath, String header,
+			List<Integer> indexes, String outputfilePath, String header,
 			String encoding) throws UnsupportedEncodingException,
 			FileNotFoundException, IOException {
 
@@ -498,7 +508,7 @@ public class FileHandler {
 			document.open();
 			String font = "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-L.ttf";
 			BaseFont ubuntuBaseCyrilicFont = BaseFont.createFont(font,
-					encoding, false);
+					"Cp1251", false);
 			Font ubuntuNormal = new Font(ubuntuBaseCyrilicFont, fontSize,
 					Font.NORMAL);
 			Font ubuntuBold = new Font(ubuntuBaseCyrilicFont, fontSize,
@@ -615,6 +625,21 @@ public class FileHandler {
 			
 		}
 		return membersPerLine;
+	}
+	
+	private static String getHeaderRow(String inputPath, String encoding){
+		String header="";
+		
+		try ( BufferedReader bfr = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath), encoding))) {
+			header = bfr.readLine();
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();;
+		}
+		
+		return header;
+		
 	}
 
 	private static String getInputFileEncoding(String inputPath) {

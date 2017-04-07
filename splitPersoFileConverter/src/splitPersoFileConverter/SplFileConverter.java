@@ -84,31 +84,6 @@ public class SplFileConverter {
 				}
 			}
 
-			// this is the slower solution
-			/*
-			 * for (int i = 0; i < half; i++) {
-			 * 
-			 * for (int j = 0; j < splBy; j++) { if (firstHalf.size() < splBy) {
-			 * isRemainderTime = true; break; } bfw.write(firstHalf.remove(0));
-			 * bfw.newLine(); lineCounter++;
-			 * 
-			 * }
-			 * 
-			 * for (int k = 0; k < splBy; k++) {
-			 * 
-			 * if (secondHalf.size() < splBy) { isRemainderTime = true; break; }
-			 * bfw.write(secondHalf.remove(0)); bfw.newLine(); lineCounter++;
-			 * 
-			 * }
-			 * 
-			 * if (isRemainderTime) { break;
-			 * 
-			 * }
-			 * 
-			 * if (lineCounter % 10000 == 0) { System.out.println(
-			 * "Written lines "+ lineCounter); } }
-			 */
-
 			if (isRemainderTime) {
 				lineCounter += writeListToFileByIndex(firstHalf, bfw, to);
 				lineCounter += writeListToFileByIndex(secondHalf, bfw, to);

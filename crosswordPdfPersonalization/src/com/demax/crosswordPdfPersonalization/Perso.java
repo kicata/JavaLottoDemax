@@ -140,11 +140,11 @@ public class Perso {
 			
 			//left part
 			placeBarcodeOnPosition(doc, cbo, Integer.toString(j), 40, 6, 1, 138, 90);
-			printMessageOnPosition(cbo, font, text+" LQVO", 5, 65, 90);
+			printMessageOnPosition(cbo, font, text+" LQVO", 5, 55, 90);
 
 			//right part
 			placeBarcodeOnPosition(doc, cbo, Integer.toString(j), 40, 6, 652, 135, -90);
-			printMessageOnPosition(cbo, font, text+" DQSNO", 652, 252, -90);
+			printMessageOnPosition(cbo, font, text+" DQSNO", 652, 262, -90);
 
 			//deepCounter Mark
 			if (flag == true) {
